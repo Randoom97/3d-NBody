@@ -1,0 +1,44 @@
+#version 430 core
+layout (local_size_x = 1) in;
+
+struct Particle {
+    vec4 pos;
+    vec4 vel;
+    double mass;
+    double padding;
+};
+
+layout(std430, binding = 0) buffer particleInputBuffer{
+    Particle particles[];
+} inBuffer;
+layout(std430, binding = 1) buffer particleOutputBuffer{
+    Particle particles[];
+} outBuffer;
+
+vec3 calcAcceleration(){
+    uint id = gl_GlobalInvocationID.x;
+    float G = 0.0000005;
+    vec3 acc = vec3(0,0,0);
+    for(int i = 0; i < gl_NumWorkGroups.x; i++){
+        if(i == id){
+            continue;
+        }
+        vec3 delta = inBuffer.particles[i].pos.xyz - inBuffer.particles[id].pos.xyz;
+        float r2 = max(dot(delta, delta), 0.01);
+        float force = G*float(inBuffer.particles[id].mass*inBuffer.particles[i].mass/r2);
+        acc += (force*normalize(delta));
+    }
+    return acc;
+}
+
+void main () {
+    uint id = gl_GlobalInvocationID.x;
+
+    vec3 acc = calcAcceleration();
+    vec3 vel = inBuffer.particles[id].vel.xyz + acc;
+    vec3 pos = inBuffer.particles[id].pos.xyz + vel;
+
+    outBuffer.particles[id].pos = vec4(pos, 0);
+    outBuffer.particles[id].vel = vec4(vel, 0);
+    outBuffer.particles[id].mass = inBuffer.particles[id].mass;
+}

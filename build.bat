@@ -1,0 +1,1 @@
+g++ -I include\ -L lib\ -g src\* -o FinalProject.exe -l glew32 -l glew32.dll -l glfw3dll -l glu32 -l opengl32

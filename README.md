@@ -1,0 +1,1 @@
+This is the final project I submitted to my interactive computer graphics course (cs6610) spring 2021. We were to propose a project of sufficient complexity that made use of concepts we learned in class in place of a final exam.
